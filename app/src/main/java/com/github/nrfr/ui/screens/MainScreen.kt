@@ -87,8 +87,12 @@ fun MainScreen(onShowAbout: () -> Unit) {
     val selectedSim = simCards.find { it.subId == selectedSubId }
         ?: simCards.find { it.isDefaultData }
         ?: simCards.firstOrNull()
+    val restoreTarget = selectedSim?.let {
+        CountryOverrideCoordinator.restoreTarget(context, it.subId, it.operatorNumeric)
+    }
     val restoreAvailable = selectedSim?.let {
-        CountryOverrideCoordinator.hasSnapshot(context, it.subId)
+        restoreTarget != null && (CountryOverrideCoordinator.hasSnapshot(context, it.subId)
+            || !it.countryIso.equals(restoreTarget, ignoreCase = true))
     } == true
 
     Scaffold(
@@ -98,7 +102,7 @@ fun MainScreen(onShowAbout: () -> Unit) {
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Icon(
-                            painter = painterResource(R.drawable.ic_launcher_foreground),
+                            painter = painterResource(R.drawable.ic_app_mark),
                             contentDescription = null,
                             modifier = Modifier.size(40.dp),
                             tint = Color.Unspecified
@@ -206,7 +210,8 @@ fun MainScreen(onShowAbout: () -> Unit) {
 
             Text(
                 "只覆盖系统报告的 SIM 国家码，不修改 SIM 本体或运营商名称。" +
-                    "网络地区可能仍显示实际接入地区。",
+                    "网络地区可能仍显示实际接入地区。已识别的中国运营商卡按运营商编码还原；" +
+                    "其他卡使用本应用保存的原值。",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
@@ -233,7 +238,7 @@ fun MainScreen(onShowAbout: () -> Unit) {
                                 }
                             }
                             lastResult = result.fold(
-                                { "国家码已恢复" },
+                                { "设置已还原" },
                                 { "恢复失败: ${it.message}" }
                             )
                             Toast.makeText(context, lastResult, Toast.LENGTH_LONG).show()

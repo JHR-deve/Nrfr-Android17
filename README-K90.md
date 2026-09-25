@@ -1,7 +1,8 @@
 # Nrfr (local Android 17 derivative)
 
-This is an isolated Android development copy of Ackites/Nrfr. It is not
-published and is an experimental, device-dependent Android 17 repair.
+This is an isolated Android development copy of Ackites/Nrfr, kept in a private
+repository. It is an experimental, device-dependent Android 17 repair, not a
+public release.
 
 - Android application ID: `io.github.jhrdeve.nrfrk90`; the upstream app uses
   `com.github.nrfr`, so the two packages can coexist.
@@ -22,8 +23,10 @@ published and is an experimental, device-dependent Android 17 repair.
 - The phone's currently working country overrides are out of scope for this
   migration and were not changed.
 - The transient override may disappear after a reboot, SIM refresh, or OS
-  update. The Restore button writes back the country captured before the first
-  write by this fork; it does not clear another app's complete CarrierConfig.
+  update. For MCC 460 cards, Restore targets CN even when another app already
+  made the reported ISO appear to be JP before this fork's first write. Other
+  cards use a saved snapshot, if available. Restore does not clear another
+  app's complete CarrierConfig.
 - Do not assume universal compatibility. The app fails closed if no SIM, no
   phone permission, no Shizuku permission, a changed SIM operator, or an
   incompatible vendor implementation is detected.
@@ -32,7 +35,8 @@ Build with Android SDK 34 and JDK 21 using `:app:assembleDebug`. The output is
 `app/build/outputs/apk/debug/app-debug.apk`. Test only after auditing the APK;
 the K90's existing working country overrides are not a baseline to erase.
 
-K90/API 37 test status (2026-09-25): both SIM slots completed a JP-to-JP
+Historical K90/API 37 test status (2026-09-25, before the MCC 460 restore fix):
+both SIM slots completed a JP-to-JP
 write/restore cycle. On SIM 1, an actual JP-to-SG change was read back as
 `sg,jp`, then restored to `jp,jp`. A second JP-to-SG change persisted after
 force-stopping this app; reopening the app restored JP and cleared its restore

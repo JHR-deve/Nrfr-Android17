@@ -25,4 +25,14 @@ public class CountryInputTest {
             } catch (IllegalStateException expected) { }
         }
     }
+
+    @Test public void mainlandSimRestoresToCnEvenWhenReportedIsoWasSpoofed() {
+        assertEquals("cn", CountryOverrideCoordinator.resolveRestoreIso("46011", "jp"));
+        assertEquals("cn", CountryOverrideCoordinator.resolveRestoreIso("46015", null));
+    }
+
+    @Test public void unknownMccUsesOnlyASavedSnapshot() {
+        assertEquals("jp", CountryOverrideCoordinator.resolveRestoreIso("44010", "jp"));
+        assertEquals(null, CountryOverrideCoordinator.resolveRestoreIso("44010", null));
+    }
 }

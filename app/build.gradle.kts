@@ -13,8 +13,8 @@ android {
         applicationId = "io.github.jhrdeve.nrfrk90"
         minSdk = 26
         targetSdk = 34
-        versionCode = 4
-        versionName = "1.0.4-a17-dev.2" // Local test build; the desktop client is not adapted.
+        versionCode = 8
+        versionName = "1.0.8-a17-dev.6" // Local test build; the desktop client is not adapted.
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

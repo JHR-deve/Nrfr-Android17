@@ -33,7 +33,7 @@ fun AboutScreen(onBack: () -> Unit) {
                         horizontalArrangement = Arrangement.Center
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_launcher_foreground),
+                            painter = painterResource(id = R.drawable.ic_app_mark),
                             modifier = Modifier.size(48.dp),
                             contentDescription = "App Icon",
                             tint = Color.Unspecified
@@ -76,11 +76,12 @@ fun AboutScreen(onBack: () -> Unit) {
                             style = MaterialTheme.typography.titleMedium
                         )
                         Text(
-                            "• 仅覆盖系统报告的 SIM 国家码，不修改 SIM 本体或运营商名称\n" +
+                            "• 保留原版免 Root 修改国家码、双卡选择和还原功能\n" +
+                                    "• 仅覆盖系统报告的 SIM 国家码，不修改 SIM 本体或运营商名称\n" +
                                     "• 使用 Shizuku 和短时 instrumentation，写入非持久配置\n" +
-                                    "• 写前保存原国家码，恢复时核对 SIM 运营商数字码\n" +
+                                    "• 还原时参考运营商编码或已保存的原值，并核对 SIM 身份\n" +
                                     "• 重启、SIM 刷新或系统更新可能使覆盖失效\n" +
-                                    "• 已在 K90 验证的行为不保证在其他机型上可用",
+                                    "• 已在 Android 17 实机验证；其他机型仍需单独测试",
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
@@ -100,23 +101,23 @@ fun AboutScreen(onBack: () -> Unit) {
                         modifier = Modifier.padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text("上游作者: Ackites；本地改版: JHR-deve")
+                        Text("原作者：Ackites；改版作者：JHR-deve")
                         Text(
-                            "GitHub: Ackites",
+                            "原作者仓库：Ackites/Nrfr",
                             modifier = Modifier.clickable {
                                 context.startActivity(
-                                    Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/Ackites"))
+                                    Intent(Intent.ACTION_VIEW, Uri.parse("https://github.com/Ackites/Nrfr"))
                                 )
                             },
                             color = MaterialTheme.colorScheme.primary
                         )
                         Text(
-                            "X (Twitter): @actkites",
+                            "改版仓库：JHR-deve/Nrfr-Android17",
                             modifier = Modifier.clickable {
                                 context.startActivity(
                                     Intent(
                                         Intent.ACTION_VIEW,
-                                        Uri.parse("https://x.com/intent/follow?screen_name=actkites")
+                                        Uri.parse("https://github.com/JHR-deve/Nrfr-Android17")
                                     )
                                 )
                             },
@@ -140,8 +141,7 @@ fun AboutScreen(onBack: () -> Unit) {
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            // Local derivative: this copy has not been published.
-                            "本地改版，基于 Ackites/Nrfr（Apache-2.0）",
+                            "基于 Ackites/Nrfr（Apache-2.0）的非官方 Android 17 改版",
                             textAlign = TextAlign.Center,
                             modifier = Modifier.fillMaxWidth()
                         )

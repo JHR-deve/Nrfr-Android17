@@ -33,6 +33,26 @@ public final class CountryOverrideCoordinator {
         return prefs.contains("iso_" + subId) && prefs.contains("numeric_" + subId);
     }
 
+    /** The value the Restore button will write, or null when it cannot be determined safely. */
+    public static String restoreTarget(Context context, int subId, String operatorNumeric) {
+        if (!SubscriptionManager.isValidSubscriptionId(subId)
+                || operatorNumeric == null || !operatorNumeric.matches("[0-9]{5,6}")) {
+            return null;
+        }
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        String savedIso = prefs.getString("iso_" + subId, null);
+        String savedNumeric = prefs.getString("numeric_" + subId, null);
+        if ((savedIso == null) != (savedNumeric == null)
+                || (savedNumeric != null && !savedNumeric.equals(operatorNumeric))) {
+            return null;
+        }
+        try {
+            return resolveRestoreIso(operatorNumeric, savedIso);
+        } catch (IllegalArgumentException ignored) {
+            return null;
+        }
+    }
+
     public static String apply(Context context, int subId, String countryIso) throws Exception {
         synchronized (OPERATION_LOCK) {
             requireSubId(subId);
@@ -44,11 +64,17 @@ public final class CountryOverrideCoordinator {
             String originalKey = "iso_" + subId;
             String numericKey = "numeric_" + subId;
             String savedNumeric = prefs.getString(numericKey, null);
+            if (prefs.contains(originalKey) != prefs.contains(numericKey)) {
+                throw new IllegalStateException("Incomplete country restore snapshot");
+            }
             if (savedNumeric != null && !savedNumeric.equals(numeric)) {
                 throw new IllegalStateException("SIM identity changed; refusing to overwrite its restore snapshot");
             }
+            // The reported ISO may already be spoofed by this or another app. For mainland China
+            // MCCs, the unmodified operator numeric gives us the physical SIM's country instead.
+            String original = resolveRestoreIso(numeric, current);
             if (!prefs.contains(originalKey) && !prefs.edit()
-                    .putString(originalKey, current)
+                    .putString(originalKey, original)
                     .putString(numericKey, numeric)
                     .commit()) {
                 throw new IllegalStateException("Could not save the original country before writing");
@@ -68,16 +94,26 @@ public final class CountryOverrideCoordinator {
             String numericKey = "numeric_" + subId;
             String original = prefs.getString(originalKey, null);
             String savedNumeric = prefs.getString(numericKey, null);
-            if (original == null || savedNumeric == null) {
-                throw new IllegalStateException("No saved country for this SIM; nothing was changed");
-            }
             TelephonyManager phone = phoneFor(context, subId);
-            if (!savedNumeric.equals(requireNumeric(phone.getSimOperator()))) {
+            String numeric = requireNumeric(phone.getSimOperator());
+            if ((original == null) != (savedNumeric == null)) {
+                throw new IllegalStateException("Incomplete country restore snapshot");
+            }
+            if (savedNumeric != null && !savedNumeric.equals(numeric)) {
                 throw new IllegalStateException("SIM identity changed; refusing to restore another card's snapshot");
             }
-            String result = withService(context,
-                    service -> service.restoreCountryIso(subId, requireIso(original), savedNumeric));
-            verifyReportedCountry(phone, original);
+            String target = resolveRestoreIso(numeric, original);
+            if (target == null) {
+                throw new IllegalStateException("No reliable country for this SIM; nothing was changed");
+            }
+            String result;
+            if (target.equalsIgnoreCase(phone.getSimCountryIso())) {
+                result = "SIM country is already " + target;
+            } else {
+                result = withService(context,
+                        service -> service.restoreCountryIso(subId, target, numeric));
+                verifyReportedCountry(phone, target);
+            }
             if (!prefs.edit().remove(originalKey).remove(numericKey).commit()) {
                 throw new IllegalStateException("Country was restored but local snapshot cleanup failed");
             }
@@ -183,5 +219,13 @@ public final class CountryOverrideCoordinator {
             throw new IllegalStateException("Real SIM operator numeric is unavailable");
         }
         return numeric;
+    }
+
+    /** Only assert a physical country for MCCs verified by this compatibility build. */
+    static String resolveRestoreIso(String operatorNumeric, String savedIso) {
+        String numeric = requireNumeric(operatorNumeric);
+        String mcc = numeric.substring(0, 3);
+        if ("460".equals(mcc)) return "cn";
+        return savedIso == null ? null : requireIso(savedIso);
     }
 }

@@ -5,7 +5,9 @@
     <color name="purple_700">#FF113540</color>
     <color name="teal_200">#FF74DFD0</color>
     <color name="teal_700">#FF0D6470</color>
-    <color name="ic_launcher_background">#FF113540</color>
+    <color name="launcher_icon_background">#111A1D</color>
+    <color name="launcher_icon_foreground">#E6EDEE</color>
+    <color name="ic_launcher_background">@color/launcher_icon_background</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
 </resources>
