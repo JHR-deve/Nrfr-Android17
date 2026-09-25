@@ -140,12 +140,13 @@ fun AboutScreen(onBack: () -> Unit) {
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         Text(
-                            "本项目已在 GitHub 开源",
+                            // Local derivative: this copy has not been published.
+                            "本地改版，基于 Ackites/Nrfr（Apache-2.0）",
                             textAlign = TextAlign.Center,
                             modifier = Modifier.fillMaxWidth()
                         )
                         Text(
-                            "访问项目主页",
+                            "查看上游项目",
                             color = MaterialTheme.colorScheme.primary,
                             textAlign = TextAlign.Center,
                             modifier = Modifier

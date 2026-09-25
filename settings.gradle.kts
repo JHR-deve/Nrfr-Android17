@@ -19,5 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Nrfr"
+// Local derivative of Ackites/Nrfr; see NOTICE-K90.md.
+rootProject.name = "Nrfr-K90"
 include(":app")

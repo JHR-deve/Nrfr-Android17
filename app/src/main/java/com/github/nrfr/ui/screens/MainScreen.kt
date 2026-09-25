@@ -63,7 +63,8 @@ fun MainScreen(onShowAbout: () -> Unit) {
                             tint = MaterialTheme.colorScheme.primary
                         )
                         Spacer(modifier = Modifier.width(4.dp))
-                        Text("Nrfr")
+                        // Local derivative; retain attribution in About and NOTICE.
+                        Text("Nrfr K90 Lab")
                     }
                 },
                 actions = {

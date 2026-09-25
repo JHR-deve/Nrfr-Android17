@@ -9,11 +9,12 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.github.nrfr"
+        // Local derivative: a distinct ID keeps the original Nrfr installation and its data intact.
+        applicationId = "io.github.jhrdeve.nrfrk90"
         minSdk = 26
         targetSdk = 34
         versionCode = 3 //版本更新 +1
-        versionName = "1.0.3" //同步更新版本号 rfr-client/app.go
+        versionName = "1.0.3-k90-dev.1" // Local test build; the desktop client is not adapted.
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

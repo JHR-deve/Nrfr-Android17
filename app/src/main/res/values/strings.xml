@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">Nrfr</string>
+    <!-- Local derivative of Ackites/Nrfr; not an official upstream release. -->
+    <string name="app_name">Nrfr K90 Lab</string>
 </resources>

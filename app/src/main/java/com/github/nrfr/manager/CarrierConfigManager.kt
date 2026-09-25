@@ -18,18 +18,19 @@ object CarrierConfigManager {
         val subId2 = SubscriptionManager.getSubId(1)
 
         if (subId1 != null) {
-            val config1 = getCurrentConfig(subId1[0])
+            val config1 = getCurrentConfig(context, subId1[0])
             simCards.add(SimCardInfo(1, subId1[0], getCarrierNameBySubId(context, subId1[0]), config1))
         }
         if (subId2 != null) {
-            val config2 = getCurrentConfig(subId2[0])
+            val config2 = getCurrentConfig(context, subId2[0])
             simCards.add(SimCardInfo(2, subId2[0], getCarrierNameBySubId(context, subId2[0]), config2))
         }
 
         return simCards
     }
 
-    private fun getCurrentConfig(subId: Int): Map<String, String> {
+    // Local derivative: use the installed package identity, not upstream's fixed package name.
+    private fun getCurrentConfig(context: Context, subId: Int): Map<String, String> {
         try {
             val carrierConfigLoader = ICarrierConfigLoader.Stub.asInterface(
                 ShizukuBinderWrapper(
@@ -39,7 +40,7 @@ object CarrierConfigManager {
                         .get()
                 )
             )
-            val config = carrierConfigLoader.getConfigForSubId(subId, "com.github.nrfr") ?: return emptyMap()
+            val config = carrierConfigLoader.getConfigForSubId(subId, context.packageName) ?: return emptyMap()
 
             val result = mutableMapOf<String, String>()
 
