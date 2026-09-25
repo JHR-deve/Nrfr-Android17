@@ -146,7 +146,7 @@ fun AboutScreen(onBack: () -> Unit) {
                             modifier = Modifier.fillMaxWidth()
                         )
                         Text(
-                            "查看上游项目",
+                            "查看本项目",
                             color = MaterialTheme.colorScheme.primary,
                             textAlign = TextAlign.Center,
                             modifier = Modifier
@@ -155,7 +155,7 @@ fun AboutScreen(onBack: () -> Unit) {
                                     context.startActivity(
                                         Intent(
                                             Intent.ACTION_VIEW,
-                                            Uri.parse("https://github.com/Ackites/Nrfr")
+                                            Uri.parse("https://github.com/JHR-deve/Nrfr-Android17")
                                         )
                                     )
                                 }

@@ -4,16 +4,25 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.widget.Toast
+import androidx.activity.compose.BackHandler
 import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,7 +35,6 @@ import rikka.shizuku.Shizuku
 class MainActivity : ComponentActivity() {
     private var isShizukuReady by mutableStateOf(false)
     private var isPhoneReadReady by mutableStateOf(false)
-    private var showAbout by mutableStateOf(false)
     private val phonePermission = registerForActivityResult(
         ActivityResultContracts.RequestPermission()
     ) { granted ->
@@ -61,20 +69,42 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             NrfrTheme {
-                if (showAbout) {
-                    AboutScreen(onBack = { showAbout = false })
-                } else if (isShizukuReady && isPhoneReadReady) {
-                    MainScreen(onShowAbout = { showAbout = true })
-                } else if (!isPhoneReadReady) {
-                    Column(
+                var showAbout by rememberSaveable { mutableStateOf(false) }
+                BackHandler(enabled = showAbout) { showAbout = false }
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    AnimatedContent(
+                        targetState = showAbout,
                         modifier = Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Text("读取已激活 SIM 卡需要电话状态权限；本应用不会读取或修改 SIM 本体。")
+                        transitionSpec = {
+                            if (targetState) {
+                                slideInHorizontally(tween(260)) { it }
+                                    .togetherWith(slideOutHorizontally(tween(260)) { -it })
+                            } else {
+                                slideInHorizontally(tween(260)) { -it }
+                                    .togetherWith(slideOutHorizontally(tween(260)) { it })
+                            }
+                        },
+                        label = "main-about-navigation"
+                    ) { about ->
+                        if (about) {
+                            AboutScreen(onBack = { showAbout = false })
+                        } else if (isShizukuReady && isPhoneReadReady) {
+                            MainScreen(onShowAbout = { showAbout = true })
+                        } else if (!isPhoneReadReady) {
+                            Column(
+                                modifier = Modifier.fillMaxSize(),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Text("读取已激活 SIM 卡需要电话状态权限；本应用不会读取或修改 SIM 本体。")
+                            }
+                        } else {
+                            ShizukuNotReadyScreen()
+                        }
                     }
-                } else {
-                    ShizukuNotReadyScreen()
                 }
             }
         }
