@@ -14,6 +14,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.github.nrfr.R
@@ -35,7 +36,7 @@ fun AboutScreen(onBack: () -> Unit) {
                             painter = painterResource(id = R.drawable.ic_launcher_foreground),
                             modifier = Modifier.size(48.dp),
                             contentDescription = "App Icon",
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = Color.Unspecified
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         Text("关于")
@@ -75,12 +76,11 @@ fun AboutScreen(onBack: () -> Unit) {
                             style = MaterialTheme.typography.titleMedium
                         )
                         Text(
-                            "• 修改 SIM 卡的国家码配置，可用于解除部分应用的地区限制\n" +
-                                    "• 帮助使用海外 SIM 卡时获得更好的本地化体验\n" +
-                                    "• 解决部分应用识别 SIM 卡地区错误的问题\n" +
-                                    "• 无需 Root 权限，无需修改系统文件，安全且可随时还原\n" +
-                                    "• 支持 Android 8 及以上系统版本\n" +
-                                    "• 支持双卡设备，可分别配置不同国家码",
+                            "• 仅覆盖系统报告的 SIM 国家码，不修改 SIM 本体或运营商名称\n" +
+                                    "• 使用 Shizuku 和短时 instrumentation，写入非持久配置\n" +
+                                    "• 写前保存原国家码，恢复时核对 SIM 运营商数字码\n" +
+                                    "• 重启、SIM 刷新或系统更新可能使覆盖失效\n" +
+                                    "• 已在 K90 验证的行为不保证在其他机型上可用",
                             style = MaterialTheme.typography.bodyMedium
                         )
                     }
@@ -100,7 +100,7 @@ fun AboutScreen(onBack: () -> Unit) {
                         modifier = Modifier.padding(16.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        Text("作者: Antkites")
+                        Text("上游作者: Ackites；本地改版: JHR-deve")
                         Text(
                             "GitHub: Ackites",
                             modifier = Modifier.clickable {
@@ -167,7 +167,7 @@ fun AboutScreen(onBack: () -> Unit) {
 
                 // 版权信息
                 Text(
-                    "© 2024 Antkites. All rights reserved.",
+                    "Nrfr: Apache-2.0；兼容层: MIT。详见仓库 NOTICE。",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

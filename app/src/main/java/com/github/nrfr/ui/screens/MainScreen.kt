@@ -2,6 +2,8 @@ package com.github.nrfr.ui.screens
 
 import android.widget.Toast
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -13,6 +15,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -21,6 +24,9 @@ import com.github.nrfr.data.CountryPresets
 import com.github.nrfr.data.PresetCarriers
 import com.github.nrfr.manager.CarrierConfigManager
 import com.github.nrfr.model.SimCardInfo
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -30,12 +36,12 @@ fun MainScreen(onShowAbout: () -> Unit) {
     var selectedCountryCode by remember { mutableStateOf("") }
     var customCountryCode by remember { mutableStateOf("") }
     var isCustomCountryCode by remember { mutableStateOf(false) }
-    var selectedCarrier by remember { mutableStateOf<PresetCarriers.CarrierPreset?>(null) }
-    var customCarrierName by remember { mutableStateOf("") }
     var isSimCardMenuExpanded by remember { mutableStateOf(false) }
     var isCountryCodeMenuExpanded by remember { mutableStateOf(false) }
-    var isCarrierMenuExpanded by remember { mutableStateOf(false) }
     var refreshTrigger by remember { mutableStateOf(0) }
+    var isBusy by remember { mutableStateOf(false) }
+    var lastResult by remember { mutableStateOf("") }
+    val scope = rememberCoroutineScope()
 
     // 获取实际的 SIM 卡信息
     val simCards = remember(context, refreshTrigger) { CarrierConfigManager.getSimCards(context) }
@@ -60,7 +66,7 @@ fun MainScreen(onShowAbout: () -> Unit) {
                             painter = painterResource(id = R.drawable.ic_launcher_foreground),
                             modifier = Modifier.size(48.dp),
                             contentDescription = "App Icon",
-                            tint = MaterialTheme.colorScheme.primary
+                            tint = Color.Unspecified
                         )
                         Spacer(modifier = Modifier.width(4.dp))
                         // Local derivative; retain attribution in About and NOTICE.
@@ -79,10 +85,14 @@ fun MainScreen(onShowAbout: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .verticalScroll(rememberScrollState())
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+            if (simCards.isEmpty()) {
+                Text("未读取到已激活的 SIM。请检查电话权限、SIM 状态或设备兼容性。")
+            }
             // SIM卡选择
             SimCardSelector(
                 simCards = simCards,
@@ -127,26 +137,13 @@ fun MainScreen(onShowAbout: () -> Unit) {
                 )
             }
 
-            // 运营商选择
-            CarrierSelector(
-                selectedCarrier = selectedCarrier,
-                isExpanded = isCarrierMenuExpanded,
-                onExpandedChange = { isCarrierMenuExpanded = it },
-                onCarrierSelected = { carrier ->
-                    selectedCarrier = carrier
-                    customCarrierName = carrier.displayName
-                }
+            Text(
+                "仅更改系统报告的 SIM 国家码；不修改 SIM 本体或运营商名称。恢复将写回本应用保存的原值。",
+                style = MaterialTheme.typography.bodySmall
             )
-
-            // 自定义运营商名称输入框
-            if (selectedCarrier?.name == "自定义") {
-                CustomCarrierNameInput(
-                    value = customCarrierName,
-                    onValueChange = { customCarrierName = it }
-                )
+            if (lastResult.isNotEmpty()) {
+                Text(lastResult, style = MaterialTheme.typography.bodyMedium)
             }
-
-            Spacer(modifier = Modifier.weight(1f))
 
             // 按钮行
             ActionButtons(
@@ -154,41 +151,36 @@ fun MainScreen(onShowAbout: () -> Unit) {
                 selectedCountryCode = selectedCountryCode,
                 isCustomCountryCode = isCustomCountryCode,
                 customCountryCode = customCountryCode,
-                selectedCarrier = selectedCarrier,
-                customCarrierName = customCarrierName,
+                isBusy = isBusy,
                 onReset = {
-                    try {
-                        CarrierConfigManager.resetCarrierConfig(it.subId)
-                        Toast.makeText(context, "设置已还原", Toast.LENGTH_SHORT).show()
+                    isBusy = true
+                    scope.launch {
+                        val result = runCatching {
+                            withContext(Dispatchers.IO) {
+                                CarrierConfigManager.restoreCountry(context, it.subId)
+                            }
+                        }
+                        lastResult = result.fold({ "国家码已恢复" },
+                            { "恢复失败: ${it.message}" })
+                        Toast.makeText(context, lastResult, Toast.LENGTH_LONG).show()
                         refreshTrigger += 1
-                        selectedCountryCode = ""
-                        selectedCarrier = null
-                        customCarrierName = ""
-                    } catch (e: Exception) {
-                        Toast.makeText(context, "还原失败: ${e.message}", Toast.LENGTH_SHORT).show()
+                        isBusy = false
                     }
                 },
                 onSave = { simCard ->
-                    try {
-                        val carrierName = if (selectedCarrier?.name == "自定义") {
-                            customCarrierName.takeIf { it.isNotEmpty() }
-                        } else {
-                            selectedCarrier?.displayName
+                    val countryCode = if (isCustomCountryCode) customCountryCode else selectedCountryCode
+                    isBusy = true
+                    scope.launch {
+                        val result = runCatching {
+                            withContext(Dispatchers.IO) {
+                                CarrierConfigManager.setCountry(context, simCard.subId, countryCode)
+                            }
                         }
-                        val countryCode = if (isCustomCountryCode) {
-                            customCountryCode.takeIf { it.length == 2 }
-                        } else {
-                            selectedCountryCode
-                        }
-                        CarrierConfigManager.setCarrierConfig(
-                            simCard.subId,
-                            countryCode,
-                            carrierName
-                        )
-                        Toast.makeText(context, "设置已保存", Toast.LENGTH_SHORT).show()
+                        lastResult = result.fold({ "国家码已生效" },
+                            { "保存失败: ${it.message}" })
+                        Toast.makeText(context, lastResult, Toast.LENGTH_LONG).show()
                         refreshTrigger += 1
-                    } catch (e: Exception) {
-                        Toast.makeText(context, "保存失败: ${e.message}", Toast.LENGTH_SHORT).show()
+                        isBusy = false
                     }
                 }
             )
@@ -230,7 +222,7 @@ private fun SimCardSelector(
                             Text("SIM ${simCard.slot} (${simCard.carrierName})")
                             if (simCard.currentConfig.isEmpty()) {
                                 Text(
-                                    "无覆盖配置",
+                                    "无法读取当前国家码",
                                     style = MaterialTheme.typography.bodySmall,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
@@ -268,13 +260,13 @@ private fun CurrentConfigCard(simCard: SimCardInfo) {
                 .padding(16.dp)
         ) {
             Text(
-                "当前配置",
+                "系统当前报告的国家码",
                 style = MaterialTheme.typography.titleMedium
             )
             Spacer(modifier = Modifier.height(8.dp))
             if (simCard.currentConfig.isEmpty()) {
                 Text(
-                    "无覆盖配置",
+                "无法读取当前国家码",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -459,8 +451,7 @@ private fun ActionButtons(
     selectedCountryCode: String,
     isCustomCountryCode: Boolean,
     customCountryCode: String,
-    selectedCarrier: PresetCarriers.CarrierPreset?,
-    customCarrierName: String,
+    isBusy: Boolean,
     onReset: (SimCardInfo) -> Unit,
     onSave: (SimCardInfo) -> Unit
 ) {
@@ -472,7 +463,7 @@ private fun ActionButtons(
         OutlinedButton(
             onClick = { selectedSimCard?.let(onReset) },
             modifier = Modifier.weight(1f),
-            enabled = selectedSimCard != null
+            enabled = selectedSimCard != null && !isBusy
         ) {
             Text("还原设置")
         }
@@ -481,11 +472,9 @@ private fun ActionButtons(
         Button(
             onClick = { selectedSimCard?.let(onSave) },
             modifier = Modifier.weight(1f),
-            enabled = selectedSimCard != null && (
-                    (isCustomCountryCode && customCountryCode.length == 2) ||
-                            (!isCustomCountryCode && selectedCountryCode.isNotEmpty()) ||
-                            (selectedCarrier != null && (selectedCarrier.name != "自定义" || customCarrierName.isNotEmpty()))
-                    )
+            enabled = selectedSimCard != null && !isBusy &&
+                (if (isCustomCountryCode) customCountryCode else selectedCountryCode)
+                    .matches(Regex("[A-Za-z]{2}"))
         ) {
             Text("保存生效")
         }
