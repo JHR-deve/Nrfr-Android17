@@ -1,11 +1,19 @@
 # Nrfr · Android 17 适配版
 
-基于 [Ackites/Nrfr](https://github.com/Ackites/Nrfr) 的非官方改版。保留原版 Android 端免 Root 修改 SIM 国家码、双卡分别设置和还原等功能，并适配 Android 17。
+基于 [Ackites/Nrfr](https://github.com/Ackites/Nrfr) 的非官方 Android 改版。保留原版通过 Shizuku 免 Root 修改系统报告的 SIM 国家码、分别设置双卡及还原设置等功能；修复原版在 Android 17 上保存配置时报错、无法使用的问题，并优化了主界面：双卡状态卡片和带国旗的地区选择更直观。
 
-本应用只覆盖系统报告的 SIM 国家码，不修改实体 SIM、MCC/MNC、IMSI 或运营商名称。需要 Shizuku 授权。配置为非持久覆盖，重启、SIM 刷新或系统更新后可能失效；不同厂商的实现也可能不同。已在 Android 17 实机验证，其他设备仍需单独测试。
+本应用只覆盖系统报告的 SIM 国家码，不修改实体 SIM、MCC/MNC、IMSI 或运营商名称。配置为非持久覆盖，重启、SIM 刷新或系统更新后可能失效。双卡修改已在 Android 17 实机验证；不同厂商的实现可能有差异。修改国家码也不保证任何第三方应用一定可用。
 
-桌面快速启动器 `nrfr-client` 保留了上游源码，但尚未适配此改版的应用包名，不属于本版已验证功能。当前提供的是调试构建，并非通用正式版。
+## 使用
 
-构建 Android APK：使用 JDK 21、Android SDK 34，运行 `./gradlew :app:assembleDebug`。输出位于 `app/build/outputs/apk/debug/app-debug.apk`。
+1. 安装并启动 [Shizuku](https://github.com/RikkaApps/Shizuku)，授权 Nrfr，并允许读取手机状态。
+2. 选择需要修改的 SIM 卡，再从带国旗的列表选择目标地区；双卡需分别操作。
+3. 需要撤销本应用的设置时，使用“还原设置”。还原仅处理国家码，不清除其他工具写入的整个 CarrierConfig。
 
-原作者：[Ackites](https://github.com/Ackites/Nrfr) · 改版作者：JHR-deve。上游代码遵循 Apache-2.0；Android 17 兼容层含来自 [SamsungRegionOverride](https://github.com/Ritel-T/SamsungRegionOverride) 的 MIT 许可代码。详见 [LICENSE](LICENSE) 和 [NOTICE-K90.md](NOTICE-K90.md)。
+正式版 APK 在本仓库的 [Releases](https://github.com/JHR-deve/Nrfr-Android17/releases) 下载。应用包名为 `io.github.jhrdeve.nrfr`，可与原版及早期 `io.github.jhrdeve.nrfrk90` 测试包并存；不同包名的数据和 Shizuku 授权不会自动迁移。桌面快速启动器 `nrfr-client` 仅保留上游源码，**尚未适配此改版，不属于本版功能**。
+
+## 开发与来源
+
+使用 JDK 21、Android SDK 34 构建：`./gradlew :app:assembleDebug :app:testDebugUnitTest`。正式版使用独立发布密钥对非调试 APK 签名；密钥不存放在仓库。构建及验证步骤见 [发布说明](docs/RELEASING.md)，兼容性与测试范围见 [兼容性说明](docs/COMPATIBILITY.md)。
+
+原作者：[Ackites](https://github.com/Ackites/Nrfr)；改版作者：JHR-deve。上游代码遵循 Apache-2.0，Android 17 兼容层包含来自 [SamsungRegionOverride](https://github.com/Ritel-T/SamsungRegionOverride) 的 MIT 许可代码。许可文本随 APK 一起打包，仓库详见 [LICENSE](LICENSE) 和 [NOTICE-ANDROID17.md](NOTICE-ANDROID17.md)。

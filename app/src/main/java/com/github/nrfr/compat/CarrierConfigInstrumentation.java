@@ -1,6 +1,6 @@
 package com.github.nrfr.compat;
 
-/* Derived from Ritel-T/SamsungRegionOverride (MIT); adapted for Nrfr K90 Lab. */
+/* Derived from Ritel-T/SamsungRegionOverride (MIT); adapted for Nrfr Android 17. */
 
 import android.Manifest;
 import android.annotation.SuppressLint;

@@ -20,6 +20,6 @@ class ExampleInstrumentedTest {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getInstrumentation().targetContext
         // Local derivative uses a separate application ID so it cannot replace upstream Nrfr.
-        assertEquals("io.github.jhrdeve.nrfrk90", appContext.packageName)
+        assertEquals("io.github.jhrdeve.nrfr", appContext.packageName)
     }
 }

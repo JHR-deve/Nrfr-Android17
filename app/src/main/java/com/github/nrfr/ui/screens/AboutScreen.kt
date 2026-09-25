@@ -77,6 +77,8 @@ fun AboutScreen(onBack: () -> Unit) {
                         )
                         Text(
                             "• 保留原版免 Root 修改国家码、双卡选择和还原功能\n" +
+                                    "• 修复原版在 Android 17 上保存配置报错的问题\n" +
+                                    "• 优化双卡主界面和带国旗的地区选择\n" +
                                     "• 仅覆盖系统报告的 SIM 国家码，不修改 SIM 本体或运营商名称\n" +
                                     "• 使用 Shizuku 和短时 instrumentation，写入非持久配置\n" +
                                     "• 还原时参考运营商编码或已保存的原值，并核对 SIM 身份\n" +
@@ -167,7 +169,7 @@ fun AboutScreen(onBack: () -> Unit) {
 
                 // 版权信息
                 Text(
-                    "Nrfr: Apache-2.0；兼容层: MIT。详见仓库 NOTICE。",
+                    "Nrfr: Apache-2.0；兼容层: MIT。详见仓库 NOTICE-ANDROID17。",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )

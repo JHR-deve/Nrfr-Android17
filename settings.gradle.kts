@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-// Local derivative of Ackites/Nrfr; see NOTICE-K90.md.
-rootProject.name = "Nrfr-K90"
+// Android 17 derivative of Ackites/Nrfr; see NOTICE-ANDROID17.md.
+rootProject.name = "Nrfr-Android17"
 include(":app")

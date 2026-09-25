@@ -9,21 +9,22 @@ android {
     compileSdk = 34
 
     defaultConfig {
-        // Local derivative: a distinct ID keeps the original Nrfr installation and its data intact.
-        applicationId = "io.github.jhrdeve.nrfrk90"
+        // Keep the public derivative separate from upstream and the earlier K90 test package.
+        applicationId = "io.github.jhrdeve.nrfr"
         minSdk = 26
         targetSdk = 34
-        versionCode = 11
-        versionName = "1.0.11-a17-dev.9" // Local test build; the desktop client is not adapted.
+        versionCode = 12
+        versionName = "1.0.0-android17"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     buildTypes {
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
-            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            // The instrumentation bridge is invoked by the platform by class name. Ship the
+            // audited classes intact until a minified release has its own device coverage.
+            isMinifyEnabled = false
+            isShrinkResources = false
         }
     }
     compileOptions {
@@ -38,7 +39,17 @@ android {
         buildConfig = true
         compose = true
     }
+    sourceSets.getByName("main").assets.srcDir(layout.buildDirectory.dir("generated/licenseAssets"))
 }
+
+val copyLicenseAssets by tasks.registering(Copy::class) {
+    from(rootProject.file("LICENSE")) { rename { "LICENSE-Apache-2.0.txt" } }
+    from(rootProject.file("licenses/SamsungRegionOverride-MIT.txt")) {
+        rename { "LICENSE-SamsungRegionOverride-MIT.txt" }
+    }
+    into(layout.buildDirectory.dir("generated/licenseAssets"))
+}
+tasks.named("preBuild").configure { dependsOn(copyLicenseAssets) }
 
 dependencies {
     implementation("androidx.core:core-ktx:1.12.0")
