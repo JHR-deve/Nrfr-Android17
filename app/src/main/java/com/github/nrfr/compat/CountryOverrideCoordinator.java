@@ -27,6 +27,12 @@ public final class CountryOverrideCoordinator {
 
     private CountryOverrideCoordinator() {}
 
+    public static boolean hasSnapshot(Context context, int subId) {
+        if (!SubscriptionManager.isValidSubscriptionId(subId)) return false;
+        SharedPreferences prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE);
+        return prefs.contains("iso_" + subId) && prefs.contains("numeric_" + subId);
+    }
+
     public static String apply(Context context, int subId, String countryIso) throws Exception {
         synchronized (OPERATION_LOCK) {
             requireSubId(subId);

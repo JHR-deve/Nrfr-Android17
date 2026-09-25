@@ -15,19 +15,22 @@ object CarrierConfigManager {
         }.getOrDefault(emptyList())
         val telephony = context.getSystemService(TelephonyManager::class.java)
             ?: return emptyList()
+        val defaultDataSubId = SubscriptionManager.getDefaultDataSubscriptionId()
         return subscriptions.mapNotNull { info -> runCatching {
             val subId = info.subscriptionId
-            if (!SubscriptionManager.isValidSubscriptionId(subId)) return@runCatching null
+            if (!SubscriptionManager.isValidSubscriptionId(subId) || info.simSlotIndex < 0) {
+                return@runCatching null
+            }
             val phone = telephony.createForSubscriptionId(subId)
-            val country = phone.simCountryIso.orEmpty().lowercase()
-            val config = if (country.matches(Regex("[a-z]{2}"))) {
-                mapOf("当前国家码" to country.uppercase())
-            } else emptyMap()
             SimCardInfo(
                 info.simSlotIndex + 1,
                 subId,
                 info.carrierName?.toString() ?: phone.networkOperatorName.orEmpty(),
-                config
+                phone.simCountryIso.orEmpty().uppercase(),
+                phone.simOperator.orEmpty(),
+                phone.networkCountryIso.orEmpty().uppercase(),
+                subId == defaultDataSubId,
+                phone.simState == TelephonyManager.SIM_STATE_READY
             )
         }.getOrNull() }.sortedBy { it.slot }
     }

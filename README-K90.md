@@ -1,10 +1,17 @@
-# Nrfr K90 Lab (local workspace)
+# Nrfr (local Android 17 derivative)
 
 This is an isolated Android development copy of Ackites/Nrfr. It is not
 published and is an experimental, device-dependent Android 17 repair.
 
 - Android application ID: `io.github.jhrdeve.nrfrk90`; the upstream app uses
   `com.github.nrfr`, so the two packages can coexist.
+- The launcher display name is `Nrfr`; the distinct application ID is retained
+  for safe coexistence with the upstream installation.
+- The dual-SIM card overview and flag-labelled region picker follow the user's
+  visual reference and the overview described by
+  [lmh-codes/Nrfr](https://github.com/lmh-codes/Nrfr). No write-path code or
+  image assets were imported from that repository; this fork keeps its own
+  country-only implementation.
 - The original hidden-class `persistent=true` shell write path is removed from
   the Android app. This fork writes only `sim_country_iso_override_string` with
   `persistent=false`; it does not alter the SIM card, MCC/MNC, IMSI, or carrier
