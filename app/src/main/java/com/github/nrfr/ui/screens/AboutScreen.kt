@@ -76,6 +76,10 @@ fun AboutScreen(onBack: () -> Unit) {
                             style = MaterialTheme.typography.titleMedium
                         )
                         Text(
+                            "Nrfr 是一款免 Root 的 SIM 国家码修改工具，通过 Shizuku 调整系统向应用报告的 SIM 所属国家/地区，用于应用地区识别、地区功能适配及漫游等场景。",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        Text(
                             "• 保留原版免 Root 修改国家码、双卡选择和还原功能\n" +
                                     "• 修复原版在 Android 17 上保存配置报错的问题\n" +
                                     "• 优化双卡主界面和带国旗的地区选择\n" +
