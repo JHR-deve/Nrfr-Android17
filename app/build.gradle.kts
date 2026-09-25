@@ -13,8 +13,8 @@ android {
         applicationId = "io.github.jhrdeve.nrfr"
         minSdk = 26
         targetSdk = 34
-        versionCode = 12
-        versionName = "1.0.0-android17"
+        versionCode = 13
+        versionName = "1.0.1-android17"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
